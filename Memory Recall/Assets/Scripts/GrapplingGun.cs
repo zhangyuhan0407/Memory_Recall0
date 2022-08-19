@@ -21,11 +21,11 @@ public class GrapplingGun : MonoBehaviour
 
     [Header("Transform Ref:")]
     public Transform gunHolder;
-   // public Transform gunHolder0;
+    // public Transform gunHolder0;
     public Transform gunPivot;
-   // public Transform gunPivot0;
+    // public Transform gunPivot0;
     public Transform firePoint;
-   // public Transform firePoint0;
+    // public Transform firePoint0;
 
     [Header("Physics Ref:")]
     public DistanceJoint2D m_distanceJoint2D;
@@ -45,7 +45,7 @@ public class GrapplingGun : MonoBehaviour
 
     [SerializeField] private Vector3 cameraPositionNow;
 
-private enum LaunchType
+    private enum LaunchType
     {
         Transform_Launch,
         Physics_Launch
@@ -92,8 +92,8 @@ private enum LaunchType
             }
             else
             {
-                    Vector2 mousePos = m_camera.ScreenToWorldPoint(Input.mousePosition);
-                    RotateGun(mousePos, true);
+                Vector2 mousePos = m_camera.ScreenToWorldPoint(Input.mousePosition);
+                RotateGun(mousePos, true);
             }
             //目前正在修改的地方
             //目前问题: 速度无法控制减速,空气阻力之影响物体降落速度, 第一个钩索作用后,释放第二个钩索概率发生反方向位移(目前推测由于第一个Vector2未作用完(第一个distance joint未作用完,按下Mouse1导致2个distance joint的碰撞问题?)
@@ -105,27 +105,29 @@ private enum LaunchType
                 {
                     Vector2 firePointDistnace = firePoint.position - gunHolder.localPosition;
                     Vector2 targetPos = grapplePoint - firePointDistnace;
-                    if(checkIsAir)
-                         player.checkAir(true);
+                    if (checkIsAir)
+                        player.checkAir(true);
                     checkIsAir = false;
                     if (check && Input.GetKey(KeyCode.Mouse1))
                     {
-                        Vector2 fnlvector0 = rope.targetPosition - new Vector2(grapplingGun.firePoint.position.x, grapplingGun.firePoint.position.y);
-                        Vector2 fnlvector1 = rope1.targetPosition - new Vector2(grapplingGun1.firePoint.position.x, grapplingGun1.firePoint.position.y);
-                        Debug.Log("第一个:"+fnlvector0.magnitude);
-                        Debug.Log("第二个"+fnlvector1.magnitude);
+                        Vector2 fnlvector0 = grapplePoint - new Vector2(grapplingGun.gunHolder.position.x, grapplingGun.gunHolder.position.y);
+                        Vector2 fnlvector1 = grapplingGun1.grapplePoint - new Vector2(grapplingGun1.gunHolder.position.x, grapplingGun1.gunHolder.position.y);
+                        Debug.Log("第一个:" + fnlvector0.magnitude);
+                        Debug.Log("第二个" + fnlvector1.magnitude);
 
                         finalV = (fnlvector0 + fnlvector1);
-                        controller.velocity = new Vector2( 4*finalV.x,4*finalV.y);
+
+                        controller.velocity = new Vector2(2 * finalV.x, 2 * finalV.y);
                         //controller.AddForce(force*finalV,ForceMode2D.Force);
                         check = false;
                     }
-                    else if(!Input.GetKey(KeyCode.Mouse1))
+                    else if (!Input.GetKey(KeyCode.Mouse1))
                     {
                         gunHolder.position = Vector2.Lerp(gunHolder.position, targetPos, Time.deltaTime * launchSpeed);
 
                     }
-                    if(Input.GetKeyDown(KeyCode.Space))
+                    Debug.DrawLine(gunHolder.position, finalV, Color.yellow);
+                    if (Input.GetKeyDown(KeyCode.Space))
                     {
                         rope.enabled = false;
                         rope1.enabled = false;
@@ -143,12 +145,9 @@ private enum LaunchType
         {
             check = true;
             checkIsAir = true;
-            if (!Input.GetKey(KeyCode.Z))
-            {
-                rope.enabled = false;
-                m_distanceJoint2D.enabled = false;
-                m_rigidbody.gravityScale = 5;
-            }
+            rope.enabled = false;
+            m_distanceJoint2D.enabled = false;
+            m_rigidbody.gravityScale = 5;
             /*else
             {
                 if (Input.GetKeyDown(KeyCode.Mouse0))
@@ -181,12 +180,15 @@ private enum LaunchType
         }
         else
         {
-            if (!Input.GetKey(KeyCode.Z))
-            {
-                Vector2 mousePos = m_camera.ScreenToWorldPoint(Input.mousePosition);
-                RotateGun(mousePos, true);          //设置gunpivot随着鼠标旋转
-            }
+            Vector2 mousePos = m_camera.ScreenToWorldPoint(Input.mousePosition);
+            RotateGun(mousePos, true);          //设置gunpivot随着鼠标旋转
         }
+        /*        if(!Input.GetKey(KeyCode.Mouse0)&& !Input.GetKey(KeyCode.Mouse1))
+                {
+                    grapplePoint = new Vector2(0, 0);
+                    rope.targetPosition = new Vector2(0, 0);
+                    rope1.targetPosition = new Vector2(0, 0);
+                }*/
     }
 
 
@@ -237,30 +239,30 @@ private enum LaunchType
                 }
             }
         }
-        
+
     }
 
-/*    void SetGrapplePoint0()
-    {
-        distanceVector0 = m_camera.ScreenToWorldPoint(Input.mousePosition) - gunPivot0.position;
-        Vector2 jointVector = distanceVector + distanceVector0;
-        //视线检测(normalized -> 标准化使矢量为单位1)
-        if (Physics2D.Raycast(firePoint0.position, distanceVector0.normalized))
+    /*    void SetGrapplePoint0()
         {
-            RaycastHit2D _hit0 = Physics2D.Raycast(firePoint0.position, distanceVector0.normalized);
-            //确定是否对象所属layer为预先设定的碰撞体对象layer
-            if (_hit0.transform.gameObject.layer == grappableLayerNumber || grappleToAll)
+            distanceVector0 = m_camera.ScreenToWorldPoint(Input.mousePosition) - gunPivot0.position;
+            Vector2 jointVector = distanceVector + distanceVector0;
+            //视线检测(normalized -> 标准化使矢量为单位1)
+            if (Physics2D.Raycast(firePoint0.position, distanceVector0.normalized))
             {
-                //确定是否超出限定最大距离
-                if (Vector2.Distance(_hit0.point, firePoint0.position) <= maxDistnace || !hasMaxDistance)
+                RaycastHit2D _hit0 = Physics2D.Raycast(firePoint0.position, distanceVector0.normalized);
+                //确定是否对象所属layer为预先设定的碰撞体对象layer
+                if (_hit0.transform.gameObject.layer == grappableLayerNumber || grappleToAll)
                 {
-                    grapplePoint0 = _hit0.point;
-                    grappleDistanceVector0 = grapplePoint0 - (Vector2)gunPivot0.position;
-                    grappleRope0.enabled = true;
+                    //确定是否超出限定最大距离
+                    if (Vector2.Distance(_hit0.point, firePoint0.position) <= maxDistnace || !hasMaxDistance)
+                    {
+                        grapplePoint0 = _hit0.point;
+                        grappleDistanceVector0 = grapplePoint0 - (Vector2)gunPivot0.position;
+                        grappleRope0.enabled = true;
+                    }
                 }
             }
-        }
-    }*/
+        }*/
 
 
     public void Grapple()
@@ -297,7 +299,7 @@ private enum LaunchType
                     break;
                 case LaunchType.Transform_Launch:
                     m_rigidbody.gravityScale = 0;
-/*                    m_rigidbody.velocity = Vector2.zero;*/
+                    /*                    m_rigidbody.velocity = Vector2.zero;*/
                     break;
             }
         }
