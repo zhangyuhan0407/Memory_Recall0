@@ -5,11 +5,13 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
-
+    GrapplingGun gun;
+    GrapplingGun1 gun1;
     public LayerMask ground;
 
     [Header("移动参数")]
-    public float speed =8.0f;
+    public float runSpeed = 8.0f;
+    private Vector2 move;
 
     public float xVelocity;
 
@@ -42,23 +44,58 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         PhysicsCheck();
+        Flip();
         Movement();
         MidAirMovement();
     }
 
-    void Movement()
+   void Movement()
     {
         xVelocity = Input.GetAxis("Horizontal");
         if (Input.GetKeyDown(KeyCode.Mouse0))
             rb.velocity = rb.velocity;
         else if(rb.IsTouchingLayers(ground)&& !Input.GetKey(KeyCode.Mouse0))
-            rb.velocity = new Vector2(xVelocity * speed, rb.velocity.y);
+            rb.velocity = new Vector2(xVelocity * runSpeed, rb.velocity.y);
 
-        //flipdirection
-/*        if(xVelocity<0)
+/*         //flipdirection
+        if(xVelocity<0)
             transform.localScale = new Vector3(-1, 1, 1);
         else
             transform.localScale = new Vector3(1, 1, 1);*/
+    }
+
+    void Flip()
+    {
+        bool plyerHasXAxisSpeed = Mathf.Abs(rb.velocity.x) > Mathf.Epsilon;
+        if (plyerHasXAxisSpeed)
+        {
+            if (rb.velocity.x > 0.1f)
+            {
+                transform.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+
+            if (rb.velocity.x < -0.1f)
+            {
+                transform.localRotation = Quaternion.Euler(0, 180, 0);
+            }
+        }
+    }
+
+    void Run()
+    {
+        if (gun.canTouchFall == false)
+        {
+            float moveDir = Input.GetAxis("Horizontal");
+            //Debug.Log("moveDir = " + moveDir.ToString());
+            //Vector2 playerVel = new Vector2(moveDir * runSpeed, myRigidbody.velocity.y);
+            //myRigidbody.velocity = playerVel;
+            //bool plyerHasXAxisSpeed = Mathf.Abs(myRigidbody.velocity.x) > Mathf.Epsilon;
+            //myAnim.SetBool("Run", plyerHasXAxisSpeed);
+
+            Vector2 playerVelocity = new Vector2(moveDir * runSpeed, rb.velocity.y);
+            rb.velocity = playerVelocity;
+            //bool playerHasXAxisSpeed = Mathf.Abs(rb.velocity.x) > Mathf.Epsilon;
+        }
     }
 
     void PhysicsCheck()
@@ -72,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
         else
             isOnGround = false;
     }
-    
+    //跳跃功能、冲刺功能
     void MidAirMovement()
     {
         if (Input.GetKeyDown(KeyCode.Space ) && ((isOnGround && !isJump ) || isAir))
@@ -91,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
             if (jumpTime < Time.time)
             {
                 isJump = false;
-                jumpForce = 20;
+                jumpForce = 40;
             }
         }
     }
