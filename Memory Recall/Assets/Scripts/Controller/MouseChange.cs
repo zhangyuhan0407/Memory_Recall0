@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class MouseChange : MonoBehaviour
 {
-    public Texture2D texture;
-    public Texture2D textureNor;
-    public Transform transform;
-    private RaycastHit hit;
+    public Texture2D textureNormal;
+    public Texture2D textureWall;
+
+
+    private RaycastHit2D hitinfo;
+    public Ray2D ray;
+
     // Start is called before the first frame update
     void Start()
     {
-        //transform = GetComponent<Transform>();
-        //hit = new RaycastHit();
+
     }
 
     // Update is called once per frame
@@ -20,18 +22,31 @@ public class MouseChange : MonoBehaviour
     {
         //Vector2 orign = transform.position;
         //RaycastHit2D ray = Physics2D.Raycast(orign, Input.mousePosition);
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //if (ray.transform.gameObject.layer == 9)
-        if (Physics.Raycast(ray, out hit))
+        //hitinfo = Physics2D.Raycast(Camera.main.WorldToScreenPoint(Input.mousePosition), Vector2.zero);
+        hitinfo = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
+
+        //表示有触碰到Collider
+        if (hitinfo)
         {
-            if (hit.collider.tag == "wall")
-                Cursor.SetCursor(textureNor, new Vector2(16, 16), CursorMode.Auto);
-            else
+            switch (hitinfo.collider.tag)
             {
-                Cursor.SetCursor(texture, new Vector2(16, 16), CursorMode.Auto);
+                //触碰到wall时，显示wall光标
+                case "wall":
+                    Cursor.SetCursor(textureWall, new Vector2(16, 16), CursorMode.Auto);
+                    break;
+                //触碰到的Collider没有Tag时，显示默认光标
+                default:
+                    Cursor.SetCursor(textureNormal, new Vector2(16, 16), CursorMode.Auto);
+                    break;
             }
         }
-
-        //Debug.DrawRay(orign, Input.mousePosition);
+        //表示没有触碰到Collider
+        else
+        {
+            Cursor.SetCursor(textureNormal, new Vector2(16, 16), CursorMode.Auto);
+        }
     }
+
 }
