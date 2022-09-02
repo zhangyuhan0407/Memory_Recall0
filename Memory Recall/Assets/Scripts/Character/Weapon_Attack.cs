@@ -24,7 +24,12 @@ public class Weapon_Attack : MonoBehaviour
         Debug.Log(collision.gameObject.name);
         if (collision.gameObject.tag == "enemy")
         {
-            
+
+            GameObject explode = Resources.Load("Prefabs/Explode") as GameObject;
+            explode.transform.position = collision.gameObject.transform.position;
+            Instantiate(explode);
+
+
             Time.timeScale = 0.1f;
             Invoke("TimeNormal", 0.04f);
             //vcam.m_Lens.OrthographicSize = NumberDecrease(vcam.m_Lens.OrthographicSize, vcam.m_Lens.OrthographicSize - 5, vcam.m_Lens.OrthographicSize);
