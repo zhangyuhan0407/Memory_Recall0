@@ -87,16 +87,28 @@ public class GrapplingGun : MonoBehaviour
     [HideInInspector] public Vector2 distanceVector0;
     [HideInInspector] public Vector2 finalV;
 
+
+    LineRenderer lineRenderer;
+/*    Transform start;
+    Transform end;*/
+
     private void Start()
     {
         rope.enabled = false;
+        lineRenderer = GetComponent<LineRenderer>();
         //attackWeapon = GameObject.FindGameObjectWithTag("attack");
         //attackWeapon.SetActive(false);
         //grappleRope0.enabled = false;
         //m_distanceJoint2D.enabled = false;
 
     }
-
+    private void FixedUpdate()
+    {
+        if (rope.enabled == false)
+            TryGetGrapplePoint();
+        else
+            lineRenderer.enabled = false;
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
@@ -181,6 +193,7 @@ public class GrapplingGun : MonoBehaviour
         else
             return length;
     }
+
     void RotateGun(Vector3 lookPoint, bool allowRotationOverTime)
     {
         Vector3 distanceVector = lookPoint - gunPivot.position;
@@ -193,6 +206,43 @@ public class GrapplingGun : MonoBehaviour
         else
         {
             gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+    }
+    void TryGetGrapplePoint()
+    {
+        lineRenderer.enabled = true;
+
+        cameraPositionNow = m_camera.ScreenToWorldPoint(Input.mousePosition);
+        //位移矢量
+        distanceVector = cameraPositionNow - gunPivot.position;
+        if (Physics2D.Raycast(firePoint.position, distanceVector.normalized))
+        {
+            RaycastHit2D _hit = Physics2D.Raycast(firePoint.position, distanceVector.normalized);
+            RaycastHit2D[] _hits = Physics2D.RaycastAll(firePoint.position, distanceVector.normalized, maxDistnace, groundLayer);
+            if (_hit.transform.gameObject.layer == 16)
+            {
+                rope.enabled = false;
+                canTouchFall = false;
+                lineRenderer.enabled = false;
+                return;
+            }
+            for (int i = 0; i < _hits.Length; i++)
+            {
+                if (_hits[i].transform.gameObject.layer == grappableLayerNumber)//||grappleAll
+                {
+                    //确定是否超出限定最大距离
+                    if (Vector2.Distance(_hits[i].point, firePoint.position) <= maxDistnace || !hasMaxDistance)
+                    {
+                        lineRenderer.SetPosition(0, firePoint.position);
+                        lineRenderer.SetPosition(1, _hits[i].point);
+                        return;
+                    }
+                }
+            }
+            if (lineRenderer.GetPosition(0) != firePoint.position)
+            {
+                lineRenderer.enabled = false;
+            }
         }
     }
 

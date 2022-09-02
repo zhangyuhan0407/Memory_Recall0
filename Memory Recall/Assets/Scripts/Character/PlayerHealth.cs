@@ -16,6 +16,7 @@ public class PlayerHealth : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        health = PlayerPrefs.GetInt("HP");
         myRender = GetComponent<Renderer>();
         anim = GetComponent<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
@@ -32,8 +33,9 @@ public class PlayerHealth : MonoBehaviour
     {
         flash.FlashScreen();
         health -= damage;
+        PlayerPrefs.SetInt("HP",health);
         //Debug.Log(health);
-        if(health<=0)
+        if (health<=0)
         {
             health = 0;
         }
@@ -53,7 +55,7 @@ public class PlayerHealth : MonoBehaviour
 
     void KillPlayer()
     {
-        rb2d.position = Vector2.zero;
+        rb2d.position = new Vector3(PlayerPrefs.GetFloat("x"), PlayerPrefs.GetFloat("y"), PlayerPrefs.GetFloat("z"));
     }
     void BlinkPlayer(int numBlinks,float seconds)
     {

@@ -6,6 +6,7 @@ using UnityEngine;
 public class Weapon_Attack : MonoBehaviour
 {
     public CinemachineVirtualCamera vcam;
+    public float duration;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,10 +20,13 @@ public class Weapon_Attack : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+
         Debug.Log(collision.gameObject.name);
         if (collision.gameObject.tag == "enemy")
         {
-            //Time.timeScale = NumberDecrease(1,0, Time.timeScale);
+            
+            Time.timeScale = 0.1f;
+            Invoke("TimeNormal", 0.04f);
             //vcam.m_Lens.OrthographicSize = NumberDecrease(vcam.m_Lens.OrthographicSize, vcam.m_Lens.OrthographicSize - 5, vcam.m_Lens.OrthographicSize);
             Destroy(collision.gameObject);
             //Time.timeScale = NumberIncrease(0,1, Time.timeScale);
@@ -44,5 +48,11 @@ public class Weapon_Attack : MonoBehaviour
         if (now <= target)
             now = target;
         return now;
+    }
+
+    void TimeNormal()
+    {
+        Debug.Log("time");
+        Time.timeScale = 1;
     }
 }
